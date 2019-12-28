@@ -1,14 +1,25 @@
 from flask import Flask
-from flask_restful import Resource, Api
+from flask import redirect
+from flask import abort
+from flask import render_template
+from flask_bootstrap import Bootstrap
 
 app = Flask(__name__)
-api = Api(app)
+bootstrapTemp = Bootstrap(app)
+@app.route('/')
+def index():
+    return render_template('index.html')
 
-class Gallery(Resource):
-    def get(self):
-        return {'Hello':'world'}
+@app.route('/user/<name>')
+def user(name):
+    if 'max' not in name:
+        abort(404)
+    return render_template('user.html', name=name)
 
-api.add_resource(Gallery, '/')
+@app.route('/google')
+def google():
+    return redirect('https://google.com')
 
-if __name__ == '__main__':
-    app.run(debug=True)
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
