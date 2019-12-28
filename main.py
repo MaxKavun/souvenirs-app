@@ -26,10 +26,6 @@ def user():
         return redirect(url_for('user'))
     return render_template('user.html', form=addItem, name=session.get('name'))
 
-@app.route('/google')
-def google():
-    return redirect('https://google.com')
-
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
