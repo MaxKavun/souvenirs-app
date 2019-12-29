@@ -3,5 +3,6 @@ from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired
 
 class AddItem(FlaskForm):
-    name = StringField('What is your name?', validators=[DataRequired()])
+    type = StringField('Type of your item', validators=[DataRequired()])
+    name = StringField('What is your item?', validators=[DataRequired()])
     submit = SubmitField('Submit')
