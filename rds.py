@@ -3,22 +3,51 @@ from os import environ
 
 class DatabaseConnection():
     def createConnection(self):
+        dbEndpoint = environ['dbEndpoint']
         dbPass = environ['mysqlpass']
-        dbCon = pymysql.connect('souvenirs.cjmiwftdk7qy.eu-north-1.rds.amazonaws.com',
-                                'admin',dbPass,'mysql')
-        return dbCon
+        dbCon = pymysql.connect(dbEndpoint,'admin',dbPass,'mysql')
+        dbCursor = dbCon.cursor()
+        return dbCursor
     
 class CreateEnvironment():
-    def createDatabase(self,dbCon):
-        print("Creating database...")
+    def __init__(self,databaseName):
+        self.databaseName = databaseName
 
-    def createTables(self,dbCon):
-        print("Creating tables...")
+    def createDatabase(self,dbCursor):
+        try:
+            queryDb = f"CREATE DATABASE {databaseName}"
+            dbCursor.execute(queryDb)
+        except:
+            return "Error while creating database"
+        return "Database successfully created"
+
+    def createTables(self,dbCursor):
+        try:
+            dbCursor.execute(f"USE {self.databaseName}")
+            queryArtifacts = "CREATE TABLE artifacts (\
+                ID int PRIMARY KEY AUTO_INCREMENT,\
+                Type varchar(255),\
+                Name varchar(255),\
+                OwnerID int,\
+                FOREIGN KEY (OwnerID) REFERENCES persons (ID)\
+            )"
+            queryOwnerCreds = "CREATE TABLE persons (\
+                ID int PRIMARY KEY AUTO_INCREMENT,\
+                FirstName varchar(255),\
+                LastName varchar(255)\
+            )"
+            dbCursor.execute(queryArtifacts)
+            dbCursor.execute(queryOwnerCreds)
+        except:
+            return "Error while creating table"
+        return "Table successfully created"
 
 class GetInformationFromDB():
-    def requestInformation(self,dbCon):
-        print("Getting information...")
+    def requestInformation(self,dbCursor):
+        query = "SELECT * FROM artifacts"
+        dbCursor.execute(query)
 
 class AddNewInformationToDB():
-    def addInformation(self,dbCon):
-        print("Adding new information...")
+    def addInformation(self,dbCursor):
+        query = "INSERT INTO persons(FirstName,LastName) VALUES('John','Doe')"
+        dbCursor.execute(query)

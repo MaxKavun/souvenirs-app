@@ -21,7 +21,10 @@ def index():
 def user():
     addItem = AddItemForm()
     rdsConnectionClass = rds.DatabaseConnection()
+    rdsEnvironment = rds.CreateEnvironment('souvenirs')
     rdsConnection = rdsConnectionClass.createConnection()
+    rdsEnvironment.createDatabase(rdsConnection)
+    rdsEnvironment.createTables(rdsConnection)
     #artifactsTable = Artifacts()
     if addItem.validate_on_submit():
         #nameOfItem = artifactsTable.getItem(addItem.type.data,addItem.name.data)
