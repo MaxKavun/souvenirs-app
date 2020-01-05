@@ -13,6 +13,11 @@ import rds
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "my secret key"
+rdsConnectionClass = rds.DatabaseConnection()
+rdsConnection = rdsConnectionClass.createConnection()
+rdsEnvironment = rds.CreateEnvironment('souvenirs')
+rdsEnvironment.createDatabase(rdsConnection)
+rdsEnvironment.createTables(rdsConnection)
 bootstrapTemp = Bootstrap(app)
 @app.route('/')
 def index():
@@ -21,11 +26,6 @@ def index():
 @app.route('/add/souvenir', methods=['GET','POST'])
 def user():
     addItem = AddItemForm()
-    rdsConnectionClass = rds.DatabaseConnection()
-    rdsEnvironment = rds.CreateEnvironment('souvenirs')
-    rdsConnection = rdsConnectionClass.createConnection()
-    rdsEnvironment.createDatabase(rdsConnection)
-    rdsEnvironment.createTables(rdsConnection)
     #artifactsTable = Artifacts()
     if addItem.validate_on_submit():
         #nameOfItem = artifactsTable.getItem(addItem.type.data,addItem.name.data)
@@ -41,6 +41,12 @@ def user():
 @app.route('/add/producer', methods=['GET','POST'])
 def producer():
     addProducer = AddProducerForm()
+    if addProducer.validate_on_submit():
+        nameProducer = addProducer.name.data
+        countryProducer = addProducer.country.data
+        rdsAddProducer = rds.AddNewInformationToDB()
+        rdsAddProducer.addInformation(rdsConnection,nameProducer,countryProducer)
+
     return render_template('add_producer.html', form=addProducer)
 
 @app.errorhandler(404)

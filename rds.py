@@ -49,6 +49,6 @@ class GetInformationFromDB():
         dbCursor.execute(query)
 
 class AddNewInformationToDB():
-    def addInformation(self,dbCursor):
-        query = "INSERT INTO persons(FirstName,LastName) VALUES('John','Doe')"
+    def addInformation(self,dbCursor,name,country):
+        query = f"INSERT INTO persons(Name,Country) VALUES({name},{country})"
         dbCursor.execute(query)

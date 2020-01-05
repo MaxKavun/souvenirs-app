@@ -4,9 +4,6 @@
 {% block page_content %}
 <div class="page-header">
     <h1>Hello, add item here !</h1>
-    {% if name %}
-    <h2>You've added {{ name }}</h2>
-    {% endif %}
 </div>
 {% import 'bootstrap/wtf.html' as wtf %}
 {{ wtf.quick_form(form) }}
