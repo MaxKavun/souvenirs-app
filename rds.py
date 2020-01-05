@@ -6,24 +6,28 @@ class DatabaseConnection():
         dbEndpoint = environ['dbEndpoint']
         dbPass = environ['mysqlpass']
         dbCon = pymysql.connect(dbEndpoint,'admin',dbPass,'mysql')
-        dbCursor = dbCon.cursor()
-        return dbCursor
+        return dbCon
     
 class CreateEnvironment():
     def __init__(self,databaseName):
+        self.dbConnection = DatabaseConnection()
+        self.dbCon = self.dbConnection.createConnection()
+        self.dbCursor = self.dbCon.cursor()
         self.databaseName = databaseName
+        self.createDatabase()
+        self.createTables()
 
-    def createDatabase(self,dbCursor):
+    def createDatabase(self):
         try:
-            queryDb = f"CREATE DATABASE {databaseName}"
-            dbCursor.execute(queryDb)
+            queryDb = f"CREATE DATABASE {self.databaseName}"
+            self.dbCursor.execute(queryDb)
         except:
             return "Error while creating database"
         return "Database successfully created"
 
-    def createTables(self,dbCursor):
+    def createTables(self):
         try:
-            dbCursor.execute(f"USE {self.databaseName}")
+            self.dbCursor.execute(f"USE {self.databaseName}")
             queryArtifacts = "CREATE TABLE artifacts (\
                 ID int PRIMARY KEY AUTO_INCREMENT,\
                 Name varchar(255),\
@@ -37,18 +41,65 @@ class CreateEnvironment():
                 Name varchar(255),\
                 Country varchar(255)\
             )"
-            dbCursor.execute(queryArtifacts)
-            dbCursor.execute(queryOwnerCreds)
+            self.dbCursor.execute(queryOwnerCreds)
+            self.dbCursor.execute(queryArtifacts)
         except:
             return "Error while creating table"
+        self.dbCon.close()
         return "Table successfully created"
 
 class GetInformationFromDB():
-    def requestInformation(self,dbCursor):
+    def __init__(self,databaseName):
+        self.dbConnection = DatabaseConnection()
+        self.databaseName = databaseName
+        self.dbCon = self.dbConnection.createConnection()
+        self.dbCursor = self.dbCon.cursor()
+        self.dbCursor.execute(f"USE {self.databaseName}")
+
+    def requestInformation(self):
         query = "SELECT * FROM artifacts"
-        dbCursor.execute(query)
+        self.dbCursor.execute(query)
+        self.dbCon.close()
+
+    def requestProducers(self):
+        query = "SELECT Name FROM persons"
+        self.dbCursor.execute(query)
+        data = self.dbCursor.fetchall()
+        self.dbCon.close()
+        return data
+
+    def requestProducer(self,producer):
+        query = f"SELECT ID FROM persons WHERE Name = '{producer}' LIMIT 1"
+        self.dbCursor.execute(query)
+        data = self.dbCursor.fetchone()
+        self.dbCon.close()
+        return data
 
 class AddNewInformationToDB():
-    def addInformation(self,dbCursor,name,country):
-        query = f"INSERT INTO persons(Name,Country) VALUES({name},{country})"
-        dbCursor.execute(query)
+    def __init__(self,databaseName):
+        self.dbConnection = DatabaseConnection()
+        self.dbCon = self.dbConnection.createConnection()
+        self.dbCursor = self.dbCon.cursor()
+        self.databaseName = databaseName
+        self.dbCursor.execute(f"USE {self.databaseName}")
+
+    def addPerson(self,name,country):
+        query = f"INSERT INTO persons(Name,Country) VALUES('{name}','{country}')"
+        try:
+            self.dbCursor.execute(query)
+            self.dbCon.commit()
+        except:
+            self.dbCon.rollback()
+        self.dbCon.close()
+
+    def addSouvenir(self,name,price,year,producer):
+        getInfo = GetInformationFromDB(self.databaseName)
+        idOfProducer = getInfo.requestProducer(producer)
+        query = f"INSERT INTO artifacts(Name,Price,YearOfMade,OwnerID) \
+                VALUES('{name}',{price},{year},{idOfProducer[0]})"
+        try:
+            self.dbCursor.execute(query)
+            self.dbCon.commit()
+        except:
+            self.dbCon.rollback()
+        self.dbCon.close()

@@ -13,11 +13,8 @@ import rds
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "my secret key"
-rdsConnectionClass = rds.DatabaseConnection()
-rdsConnection = rdsConnectionClass.createConnection()
-rdsEnvironment = rds.CreateEnvironment('souvenirs')
-rdsEnvironment.createDatabase(rdsConnection)
-rdsEnvironment.createTables(rdsConnection)
+databaseName = 'souvenirs'
+rdsEnvironment = rds.CreateEnvironment(databaseName)
 bootstrapTemp = Bootstrap(app)
 @app.route('/')
 def index():
@@ -25,18 +22,19 @@ def index():
 
 @app.route('/add/souvenir', methods=['GET','POST'])
 def user():
-    addItem = AddItemForm()
-    #artifactsTable = Artifacts()
+    rdsGetInfo = rds.GetInformationFromDB(databaseName)
+    rdsGetInfoProducers = rdsGetInfo.requestProducers()
+    addItem = AddItemForm(rdsGetInfoProducers)
     if addItem.validate_on_submit():
-        #nameOfItem = artifactsTable.getItem(addItem.type.data,addItem.name.data)
-        nameOfItem = session.get('name')
-        if nameOfItem is None:
-            #artifactsTable.addItem(addItem.type.data,addItem.name.data)
-            flash("Looks like you have added a new item")
-        else:
-            session['name'] = addItem.name.data
+        souvenirName = addItem.name.data
+        souvenirPrice = addItem.price.data
+        souvenirYear = addItem.year.data
+        souvenirProducer = addItem.madeIn.data
+        rdsAddSouvenir = rds.AddNewInformationToDB(databaseName)
+        rdsAddSouvenir.addSouvenir(souvenirName,souvenirPrice,souvenirYear,souvenirProducer)
+
         return redirect(url_for('user'))
-    return render_template('add_item.html', form=addItem, name=session.get('name'))
+    return render_template('add_item.html', form=addItem)
 
 @app.route('/add/producer', methods=['GET','POST'])
 def producer():
@@ -44,8 +42,8 @@ def producer():
     if addProducer.validate_on_submit():
         nameProducer = addProducer.name.data
         countryProducer = addProducer.country.data
-        rdsAddProducer = rds.AddNewInformationToDB()
-        rdsAddProducer.addInformation(rdsConnection,nameProducer,countryProducer)
+        rdsAddProducer = rds.AddNewInformationToDB(databaseName)
+        rdsAddProducer.addPerson(nameProducer,countryProducer)
 
     return render_template('add_producer.html', form=addProducer)
 
