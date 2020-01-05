@@ -26,8 +26,7 @@ def user():
             artifactsTable.addItem(addItem.type.data,addItem.name.data)
             flash("Looks like you have added a new item")
         else:
-        oldName = session.get('name')
-        session['name'] = addItem.name.data
+            session['name'] = addItem.name.data
         return redirect(url_for('user'))
     return render_template('add_item.html', form=addItem, name=session.get('name'))
 
