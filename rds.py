@@ -26,15 +26,16 @@ class CreateEnvironment():
             dbCursor.execute(f"USE {self.databaseName}")
             queryArtifacts = "CREATE TABLE artifacts (\
                 ID int PRIMARY KEY AUTO_INCREMENT,\
-                Type varchar(255),\
                 Name varchar(255),\
+                Price int,\
+                YearOfMade int,\
                 OwnerID int,\
                 FOREIGN KEY (OwnerID) REFERENCES persons (ID)\
             )"
             queryOwnerCreds = "CREATE TABLE persons (\
                 ID int PRIMARY KEY AUTO_INCREMENT,\
-                FirstName varchar(255),\
-                LastName varchar(255)\
+                Name varchar(255),\
+                Country varchar(255)\
             )"
             dbCursor.execute(queryArtifacts)
             dbCursor.execute(queryOwnerCreds)

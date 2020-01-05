@@ -7,6 +7,7 @@ from flask import url_for
 from flask import flash
 from flask_bootstrap import Bootstrap
 from additem import AddItem as AddItemForm
+from addproducer import AddProducer as AddProducerForm
 #from dynamodb import Artifacts
 import rds
 
@@ -17,7 +18,7 @@ bootstrapTemp = Bootstrap(app)
 def index():
     return render_template('index.html')
 
-@app.route('/add', methods=['GET','POST'])
+@app.route('/add/souvenir', methods=['GET','POST'])
 def user():
     addItem = AddItemForm()
     rdsConnectionClass = rds.DatabaseConnection()
@@ -36,6 +37,11 @@ def user():
             session['name'] = addItem.name.data
         return redirect(url_for('user'))
     return render_template('add_item.html', form=addItem, name=session.get('name'))
+
+@app.route('/add/producer', methods=['GET','POST'])
+def producer():
+    addProducer = AddProducerForm()
+    return render_template('add_producer.html', form=addProducer)
 
 @app.errorhandler(404)
 def page_not_found(e):
