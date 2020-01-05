@@ -7,7 +7,8 @@ from flask import url_for
 from flask import flash
 from flask_bootstrap import Bootstrap
 from additem import AddItem as AddItemForm
-from dynamodb import Artifacts
+#from dynamodb import Artifacts
+import rds
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "my secret key"
@@ -19,11 +20,14 @@ def index():
 @app.route('/add', methods=['GET','POST'])
 def user():
     addItem = AddItemForm()
-    artifactsTable = Artifacts()
+    rdsConnectionClass = rds.DatabaseConnection()
+    rdsConnection = rdsConnectionClass.createConnection()
+    #artifactsTable = Artifacts()
     if addItem.validate_on_submit():
-        nameOfItem = artifactsTable.getItem(addItem.type.data,addItem.name.data)
+        #nameOfItem = artifactsTable.getItem(addItem.type.data,addItem.name.data)
+        nameOfItem = session.get('name')
         if nameOfItem is None:
-            artifactsTable.addItem(addItem.type.data,addItem.name.data)
+            #artifactsTable.addItem(addItem.type.data,addItem.name.data)
             flash("Looks like you have added a new item")
         else:
             session['name'] = addItem.name.data
