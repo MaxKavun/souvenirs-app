@@ -12,6 +12,7 @@ Jinja2==2.10.3
 jmespath==0.9.4
 MarkupSafe==1.1.1
 pyasn1==0.4.8
+PyMySQL==0.9.3
 python-dateutil==2.8.0
 PyYAML==5.1.2
 rsa==3.4.2
