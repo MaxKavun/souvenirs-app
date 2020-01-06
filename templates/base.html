@@ -2,6 +2,12 @@
 {% block title %}Gallery{% endblock %}
 {% block head %}
 {{ super() }}
+<style type="text/css">
+    .container {
+        width: 940px;
+        .center-block();
+}
+</style>
 <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}"
 type="image/x-icon">
 <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}"
@@ -14,10 +20,11 @@ type="image/x-icon">
     data-toggle="collapse" data-target=".navbar-collapse"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar"></span>
     <span class="icon-bar"></span>
     <span class="icon-bar"></span> </button>
-    <a class="navbar-brand" href="/">Gallery</a> </div>
+    <a class="navbar-brand" href="/">Souvenirs</a> </div>
     <div class="navbar-collapse collapse"> <ul class="nav navbar-nav">
     <li><a href="{{ url_for('index') }}">Home</a></li>
-    <li><a href="{{ url_for('user') }}">Add item</a></li> </ul>
+    <li><a href="{{ url_for('user') }}">Add souvenir</a></li>
+    <li><a href="{{ url_for('producer') }}">Add producer</a></li> </ul>
     </div>
     </div>
 </div>

@@ -1,8 +1,32 @@
 {% extends 'base.html' %}
-{% block title %}Gallery{% endblock %}
+{% block title %}Souvenirs{% endblock %}
 
 {% block page_content %}
 <div class="page-header">
-    <h1>Application based on Flask</h1>
+    <h1>Souvenirs from around the world</h1>
+</div>
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Souvenir name</th>
+                <th>Price</th>
+                <th>Producer</th>
+                <th>Country</th>
+                <th>Year</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for name,price,year,producer,country in souvenirs %}
+                <tr>
+                    <td>{{ name }}</td>
+                    <td>{{ price }}</td>
+                    <td>{{ producer }}</td>
+                    <td>{{ country }}</td>
+                    <td>{{ year }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 {% endblock %}
