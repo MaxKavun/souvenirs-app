@@ -8,6 +8,7 @@ from flask import flash
 from flask_bootstrap import Bootstrap
 from additem import AddItem as AddItemForm
 from addproducer import AddProducer as AddProducerForm
+from sort import SortData as SortDataForm
 #from dynamodb import Artifacts
 import rds
 
@@ -16,11 +17,49 @@ app.config['SECRET_KEY'] = "my secret key"
 databaseName = 'souvenirs'
 rdsEnvironment = rds.CreateEnvironment(databaseName)
 bootstrapTemp = Bootstrap(app)
-@app.route('/')
+@app.route('/', methods=['GET','POST'])
 def index():
+    sortForm = SortDataForm()
     rdsGetInfo = rds.GetInformationFromDB(databaseName)
     rdsData = rdsGetInfo.requestInformation()
-    return render_template('index.html', souvenirs=rdsData)
+    if sortForm.validate_on_submit():
+        nameOfSouvenir = sortForm.souvenir.data
+        producer = sortForm.producer.data
+        country = sortForm.country.data
+        price = sortForm.price.data
+        year = sortForm.year.data
+        radioBtn = sortForm.sortBy.data
+        tmpRdsData = []
+        if radioBtn == "Producer" and len(producer) > 0:
+            for x in rdsData:
+                if x[3] == producer:
+                    tmpRdsData.append(x)
+            rdsData = tmpRdsData
+            flash(radioBtn)
+        if radioBtn == "Country" and len(country) > 0:
+            for x in rdsData:
+                if x[4] == country:
+                    tmpRdsData.append(x)
+            rdsData = tmpRdsData
+            flash(radioBtn)
+        if radioBtn == "Price less" and price is not None: 
+            for x in rdsData:
+                if x[1] < price:
+                    tmpRdsData.append(x)
+            rdsData = tmpRdsData
+            flash(radioBtn)
+        if radioBtn == "Year and Producer" and len(nameOfSouvenir) > 0 and year is not None:
+            for x in rdsData:
+                if x[0] == nameOfSouvenir and x[2] == year:
+                    tmpRdsData.append(x)
+            rdsData = tmpRdsData
+            flash(radioBtn)
+        if radioBtn == "Delete producer" and len(producer) > 0:
+            rdsRemove = rds.DeleteInfo(databaseName)
+            rdsRemove.removeProducer(producer)
+            flash("Producer with souvenirs was deleted")
+            return redirect(url_for('index'))
+    return render_template('index.html', souvenirs=rdsData, form=sortForm)
 
 @app.route('/add/souvenir', methods=['GET','POST'])
 def user():

@@ -108,3 +108,21 @@ class AddNewInformationToDB():
         except:
             self.dbCon.rollback()
         self.dbCon.close()
+
+class DeleteInfo():
+    def __init__(self,databaseName):
+        self.dbConnection = DatabaseConnection()
+        self.dbCon = self.dbConnection.createConnection()
+        self.dbCursor = self.dbCon.cursor()
+        self.databaseName = databaseName
+        self.dbCursor.execute(f"USE {self.databaseName}")
+
+    def removeProducer(self,producer):
+        queryArtifacts = f"DELETE artifacts\
+                        FROM artifacts \
+                        JOIN persons ON persons.ID = artifacts.OwnerID\
+                        WHERE persons.Name = '{ producer }'"
+        self.dbCursor.execute(queryArtifacts)
+        self.dbCon.commit()
+        self.dbCon.close()
+        return self.dbCursor.fetchone()

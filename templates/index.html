@@ -5,6 +5,12 @@
 <div class="page-header">
     <h1>Souvenirs from around the world</h1>
 </div>
+{% import 'bootstrap/wtf.html' as wtf %}
+<button class="btn" data-toggle="collapse" data-target="#demo">Sort by</button>
+
+<div id="demo" class="collapse">
+    {{ wtf.quick_form(form) }}
+</div>
 <div class="table-responsive">
     <table class="table">
         <thead>
