@@ -57,9 +57,14 @@ class GetInformationFromDB():
         self.dbCursor.execute(f"USE {self.databaseName}")
 
     def requestInformation(self):
-        query = "SELECT * FROM artifacts"
+        query = "SELECT art.Name,art.Price,art.YearOfMade,ps.Name,ps.Country \
+                FROM artifacts as art\
+                JOIN persons as ps ON ps.ID = art.OwnerID\
+                WHERE 1=1"
         self.dbCursor.execute(query)
+        data = self.dbCursor.fetchall()
         self.dbCon.close()
+        return data
 
     def requestProducers(self):
         query = "SELECT Name FROM persons"

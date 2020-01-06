@@ -18,7 +18,9 @@ rdsEnvironment = rds.CreateEnvironment(databaseName)
 bootstrapTemp = Bootstrap(app)
 @app.route('/')
 def index():
-    return render_template('index.html')
+    rdsGetInfo = rds.GetInformationFromDB(databaseName)
+    rdsData = rdsGetInfo.requestInformation()
+    return render_template('index.html', souvenirs=rdsData)
 
 @app.route('/add/souvenir', methods=['GET','POST'])
 def user():
