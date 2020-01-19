@@ -41,9 +41,7 @@ class CreateEnvironment():
                 ID int PRIMARY KEY AUTO_INCREMENT,\
                 FirstName varchar(255),\
                 LastName varchar(255),\
-                Street varchar(255),\
-                TherapistID int,\
-                FOREIGN KEY (TherapistID) REFERENCES therapists (ID)\
+                Street varchar(255)\
             )"
             self.dbCursor.execute(queryPatients)
             queryVisits = "CREATE TABLE visits (\
@@ -102,8 +100,9 @@ class AddNewInformationToDB():
         self.databaseName = databaseName
         self.dbCursor.execute(f"USE {self.databaseName}")
 
-    def addPerson(self,name,country):
-        query = f"INSERT INTO persons(Name,Country) VALUES('{name}','{country}')"
+    def addTherapist(self,firstName,lastName,speciality,shift):
+        query = f"INSERT INTO therapists(firstName,lastName,speciality,shift)\
+                    VALUES('{firstName}','{lastName}','{speciality}','{shift}')"
         try:
             self.dbCursor.execute(query)
             self.dbCon.commit()
@@ -111,11 +110,19 @@ class AddNewInformationToDB():
             self.dbCon.rollback()
         self.dbCon.close()
 
-    def addSouvenir(self,name,price,year,producer):
-        getInfo = GetInformationFromDB(self.databaseName)
-        idOfProducer = getInfo.requestProducer(producer)
-        query = f"INSERT INTO artifacts(Name,Price,YearOfMade,OwnerID) \
-                VALUES('{name}',{price},{year},{idOfProducer[0]})"
+    def addPatient(self,firstName,lastName,street):
+        query = f"INSERT INTO patients(FirstName,LastName,Street) \
+                VALUES('{firstName}','{lastName}','{street}')"
+        try:
+            self.dbCursor.execute(query)
+            self.dbCon.commit()
+        except:
+            self.dbCon.rollback()
+        self.dbCon.close()
+
+
+    def addEncounter(self,name,country):
+        query = f"INSERT INTO persons(Name,Country) VALUES('{name}','{country}')"
         try:
             self.dbCursor.execute(query)
             self.dbCon.commit()

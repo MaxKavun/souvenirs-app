@@ -6,8 +6,8 @@ from flask import session
 from flask import url_for
 from flask import flash
 from flask_bootstrap import Bootstrap
-from addpatient import AddItem as AddItemForm
-from addencounter import AddProducer as AddProducerForm
+from addpatient import AddPatient as AddPatientForm
+from addtherapist import AddTherapist as AddTherapistForm
 from sort import SortData as SortDataForm
 #from dynamodb import Artifacts
 import database
@@ -62,31 +62,31 @@ def index():
     return render_template('index.html', visits=allVisits, form=sortForm)
 
 @app.route('/add/patient', methods=['GET','POST'])
-def user():
-    rdsGetInfo = database.GetInformationFromDB(databaseName)
-    rdsGetInfoProducers = rdsGetInfo.requestProducers()
-    addItem = AddItemForm(rdsGetInfoProducers)
-    if addItem.validate_on_submit():
-        souvenirName = addItem.name.data
-        souvenirPrice = addItem.price.data
-        souvenirYear = addItem.year.data
-        souvenirProducer = addItem.madeIn.data
-        rdsAddSouvenir = database.AddNewInformationToDB(databaseName)
-        rdsAddSouvenir.addSouvenir(souvenirName,souvenirPrice,souvenirYear,souvenirProducer)
+def patient():
+    addPatient = AddPatientForm()
+    if addPatient.validate_on_submit():
+        firstName = addPatient.firstName.data
+        lastName = addPatient.lastName.data
+        street = addPatient.street.data
+        dbAddPatient = database.AddNewInformationToDB(databaseName)
+        dbAddPatient.addPatient(firstName,lastName,street)
+        return redirect(url_for('patient'))
 
-        return redirect(url_for('user'))
-    return render_template('add_item.html', form=addItem)
+    return render_template('add_patient.html', form=addPatient)
 
 @app.route('/add/therapist', methods=['GET','POST'])
-def producer():
-    addProducer = AddProducerForm()
-    if addProducer.validate_on_submit():
-        nameProducer = addProducer.name.data
-        countryProducer = addProducer.country.data
-        rdsAddProducer = database.AddNewInformationToDB(databaseName)
-        rdsAddProducer.addPerson(nameProducer,countryProducer)
+def therapist():
+    addTherapist = AddTherapistForm()
+    if addTherapist.validate_on_submit():
+        firstName = addTherapist.firstName.data
+        lastName = addTherapist.lastName.data
+        speciality = addTherapist.speciality.data
+        shift = addTherapist.shift.data
+        dbAddTherapist = database.AddNewInformationToDB(databaseName)
+        dbAddTherapist.addTherapist(firstName,lastName,speciality,shift)
+        return redirect(url_for('therapist'))
 
-    return render_template('add_producer.html', form=addProducer)
+    return render_template('add_therapist.html', form=addTherapist)
 
 @app.errorhandler(404)
 def page_not_found(e):
