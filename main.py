@@ -10,6 +10,8 @@ from addpatient import AddPatient as AddPatientForm
 from addtherapist import AddTherapist as AddTherapistForm
 from addencounter import AddEncounter as AddEncounterForm
 from sort import SortData as SortDataForm
+from sortPatients import SortPatients as SortPatientsForm
+from sortTherapists import SortTherapists as SortTherapistsForm
 #from dynamodb import Artifacts
 import database
 import sys
@@ -78,36 +80,41 @@ def encounter():
 @app.route('/show/therapists', methods=['GET','POST'])
 def getTherapist():
     dbConn = database.GetInformationFromDB(databaseName)
-    getAllPatients = dbConn.requestPatients()
-    getAllTherapists = dbConn.requestTherapists()
-    addEncounter = AddEncounterForm(getAllPatients,getAllTherapists)
-    if addEncounter.validate_on_submit():
-        date = addEncounter.date.data.strftime('%Y-%m-%d')
-        reason = addEncounter.reason.data
-        patient = addEncounter.patient.data.split(' ')
-        therapist = addEncounter.therapist.data.split(' ')
-        dbConn = database.AddNewInformationToDB(databaseName)
-        dbConn.addEncounter(date,reason,patient,therapist)
-        return redirect(url_for('getTherapist'))
+    allTherapists = dbConn.requestTherapists(True)
+    sortForm = SortTherapistsForm()
+    if sortForm.validate_on_submit():
+        tmpallTherapists = []
+        speciality = sortForm.speciality.data
+        shift = sortForm.shift.data
+        radioBtn = sortForm.sortBy.data
+        if radioBtn == "Speciality":
+            for therapist in allTherapists:
+                if therapist[2] == speciality:
+                    tmpallTherapists.append(therapist)
+            allTherapists = tmpallTherapists
+        if radioBtn == "Shift":
+            for therapist in allTherapists:
+                if therapist[3] == shift:
+                    tmpallTherapists.append(therapist)
+            allTherapists = tmpallTherapists
+        
 
-    return render_template('therapists.html', form=addEncounter)
+    return render_template('therapists.html',form=sortForm, therapists=allTherapists)
 
 @app.route('/show/patients', methods=['GET','POST'])
 def getPatient():
     dbConn = database.GetInformationFromDB(databaseName)
-    getAllPatients = dbConn.requestPatients()
-    getAllTherapists = dbConn.requestTherapists()
-    addEncounter = AddEncounterForm(getAllPatients,getAllTherapists)
-    if addEncounter.validate_on_submit():
-        date = addEncounter.date.data.strftime('%Y-%m-%d')
-        reason = addEncounter.reason.data
-        patient = addEncounter.patient.data.split(' ')
-        therapist = addEncounter.therapist.data.split(' ')
-        dbConn = database.AddNewInformationToDB(databaseName)
-        dbConn.addEncounter(date,reason,patient,therapist)
-        return redirect(url_for('getTherapist'))
+    allPatients = dbConn.requestPatients(True)
+    sortForm = SortPatientsForm()
+    if sortForm.validate_on_submit():
+        tmpAllPatients = []
+        street = sortForm.street.data
+        for patient in allPatients:
+            if patient[2] == street:
+                tmpAllPatients.append(patient)
+        allPatients = tmpAllPatients
 
-    return render_template('patients.html', form=addEncounter)
+    return render_template('patients.html',form=sortForm, patients=allPatients)
 
 @app.errorhandler(404)
 def page_not_found(e):

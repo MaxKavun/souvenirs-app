@@ -15,19 +15,17 @@
     <table class="table">
         <thead>
             <tr>
-                <th>Date</th>
-                <th>Reason</th>
-                <th>Patient</th>
-                <th>Therapist</th>
+                <th>FirstName</th>
+                <th>LastName</th>
+                <th>Street</th>
             </tr>
         </thead>
         <tbody>
-            {% for date,reason,patient,therapist in visits %}
+            {% for firstName,lastName,street in patients %}
                 <tr>
-                    <td>{{ date }}</td>
-                    <td>{{ reason }}</td>
-                    <td>{{ patient }}</td>
-                    <td>{{ therapist }}</td>
+                    <td>{{ firstName }}</td>
+                    <td>{{ lastName }}</td>
+                    <td>{{ street }}</td>
                 </tr>
             {% endfor %}
         </tbody>

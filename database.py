@@ -79,8 +79,11 @@ class GetInformationFromDB():
         self.dbCon.close()
         return data
 
-    def requestPatients(self):
-        query = "SELECT CONCAT(FirstName,' ',LastName) FROM patients"
+    def requestPatients(self,allInformation=False):
+        if allInformation==False:
+            query = "SELECT CONCAT(FirstName,' ',LastName) FROM patients"
+        else:
+            query = "SELECT FirstName,LastName,Street FROM patients"
         self.dbCursor.execute(query)
         data = self.dbCursor.fetchall()
         return data
@@ -92,11 +95,15 @@ class GetInformationFromDB():
         data = self.dbCursor.fetchone()
         return data
 
-    def requestTherapists(self):
-        query = "SELECT CONCAT(FirstName,' ',LastName,' ',Speciality) FROM therapists"
+    def requestTherapists(self,allInformation=False):
+        if allInformation==False:
+            query = "SELECT CONCAT(FirstName,' ',LastName,' ',Speciality) FROM therapists"
+        else:
+            query = "SELECT FirstName,LastName,Speciality,Shift FROM therapists"
         self.dbCursor.execute(query)
         data = self.dbCursor.fetchall()
         self.dbCon.close()
+        print(data, file=sys.stdout)
         return data
 
 class AddNewInformationToDB():
