@@ -14,7 +14,7 @@ import rds
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "my secret key"
-databaseName = 'souvenirs'
+databaseName = 'hospital'
 rdsEnvironment = rds.CreateEnvironment(databaseName)
 bootstrapTemp = Bootstrap(app)
 @app.route('/', methods=['GET','POST'])

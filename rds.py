@@ -3,9 +3,10 @@ from os import environ
 
 class DatabaseConnection():
     def createConnection(self):
-        dbEndpoint = environ['dbEndpoint']
+        #dbEndpoint = environ['dbEndpoint']
+        dbEndpoint = '13.48.86.228'
         dbPass = environ['mysqlpass']
-        dbCon = pymysql.connect(dbEndpoint,'admin',dbPass,'mysql')
+        dbCon = pymysql.connect(dbEndpoint,'admin',dbPass,'mysql',3306)
         return dbCon
     
 class CreateEnvironment():
@@ -28,7 +29,7 @@ class CreateEnvironment():
     def createTables(self):
         try:
             self.dbCursor.execute(f"USE {self.databaseName}")
-            queryArtifacts = "CREATE TABLE artifacts (\
+            queryTherapists = "CREATE TABLE therapists (\
                 ID int PRIMARY KEY AUTO_INCREMENT,\
                 Name varchar(255),\
                 Price int,\
@@ -36,13 +37,19 @@ class CreateEnvironment():
                 OwnerID int,\
                 FOREIGN KEY (OwnerID) REFERENCES persons (ID)\
             )"
-            queryOwnerCreds = "CREATE TABLE persons (\
+            self.dbCursor.execute(queryTherapists)
+            queryPatients = "CREATE TABLE patients (\
                 ID int PRIMARY KEY AUTO_INCREMENT,\
                 Name varchar(255),\
                 Country varchar(255)\
             )"
-            self.dbCursor.execute(queryOwnerCreds)
-            self.dbCursor.execute(queryArtifacts)
+            self.dbCursor.execute(queryPatients)
+            queryVisits = "CREATE TABLE visits (\
+                ID int PRIMARY KEY AUTO_INCREMENT,\
+                Name varchar(255),\
+                Country varchar(255)\
+            )"
+            self.dbCursor.execute(queryVisits)
         except:
             return "Error while creating table"
         self.dbCon.close()
