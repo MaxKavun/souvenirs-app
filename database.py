@@ -1,5 +1,6 @@
 import pymysql
 from os import environ
+import sys
 
 class DatabaseConnection():
     def createConnection(self):
@@ -78,17 +79,23 @@ class GetInformationFromDB():
         self.dbCon.close()
         return data
 
-    def requestProducers(self):
-        query = "SELECT Name FROM persons"
+    def requestPatients(self):
+        query = "SELECT CONCAT(FirstName,' ',LastName) FROM patients"
         self.dbCursor.execute(query)
         data = self.dbCursor.fetchall()
-        self.dbCon.close()
         return data
 
-    def requestProducer(self,producer):
-        query = f"SELECT ID FROM persons WHERE Name = '{producer}' LIMIT 1"
+    def requestPatient(self,patient):
+        query = f"SELECT ID FROM patients \
+        WHERE FirstName='{patient[0]}' AND LastName='{patient[1]}'"
         self.dbCursor.execute(query)
         data = self.dbCursor.fetchone()
+        return data
+
+    def requestTherapists(self):
+        query = "SELECT CONCAT(FirstName,' ',LastName,' ',Speciality) FROM therapists"
+        self.dbCursor.execute(query)
+        data = self.dbCursor.fetchall()
         self.dbCon.close()
         return data
 
@@ -101,8 +108,8 @@ class AddNewInformationToDB():
         self.dbCursor.execute(f"USE {self.databaseName}")
 
     def addTherapist(self,firstName,lastName,speciality,shift):
-        query = f"INSERT INTO therapists(firstName,lastName,speciality,shift)\
-                    VALUES('{firstName}','{lastName}','{speciality}','{shift}')"
+        query = f"INSERT INTO therapists(firstName,lastName,speciality,shift) \
+        VALUES('{firstName}','{lastName}','{speciality}','{shift}')"
         try:
             self.dbCursor.execute(query)
             self.dbCon.commit()
@@ -111,8 +118,7 @@ class AddNewInformationToDB():
         self.dbCon.close()
 
     def addPatient(self,firstName,lastName,street):
-        query = f"INSERT INTO patients(FirstName,LastName,Street) \
-                VALUES('{firstName}','{lastName}','{street}')"
+        query = f"INSERT INTO patients(FirstName,LastName,Street) VALUES('{firstName}','{lastName}','{street}')"
         try:
             self.dbCursor.execute(query)
             self.dbCon.commit()
@@ -121,8 +127,13 @@ class AddNewInformationToDB():
         self.dbCon.close()
 
 
-    def addEncounter(self,name,country):
-        query = f"INSERT INTO persons(Name,Country) VALUES('{name}','{country}')"
+    def addEncounter(self,date,reason,patient,therapist):
+        getPatientID = GetInformationFromDB(self.databaseName)
+        patientID = getPatientID.requestPatient(patient)
+        query = f"INSERT INTO visits(Date,Reason,PatientID,TherapistID)\
+                  SELECT '{date}','{reason}',{patientID[0]},ID FROM therapists\
+                  WHERE FirstName='{therapist[0]}' and LastName='{therapist[1]}' \
+                  and Speciality='{therapist[2]}'"
         try:
             self.dbCursor.execute(query)
             self.dbCon.commit()
@@ -138,12 +149,24 @@ class DeleteInfo():
         self.databaseName = databaseName
         self.dbCursor.execute(f"USE {self.databaseName}")
 
-    def removeProducer(self,producer):
-        queryArtifacts = f"DELETE artifacts\
-                        FROM artifacts \
-                        JOIN persons ON persons.ID = artifacts.OwnerID\
-                        WHERE persons.Name = '{ producer }'"
-        self.dbCursor.execute(queryArtifacts)
+    def removePatientsOlder20Years(self):
+        queryGetPatients = f"SELECT PatientID FROM visits \
+        WHERE visits.Date < DATE_SUB(NOW(), INTERVAL 20 YEAR)"
+        self.dbCursor.execute(queryGetPatients)
+        patients = self.dbCursor.fetchall()
+        for patient in patients:
+            queryCheckPatient = f"SELECT ID FROM visits \
+                                where PatientID = {patient[0]} AND \
+                                Date > DATE_SUB(NOW(), INTERVAL 20 YEAR)"
+            self.dbCursor.execute(queryCheckPatient)
+            result = self.dbCursor.fetchall()
+            if len(result) > 0:
+                continue
+            queryPatients = f"DELETE FROM visits WHERE \
+                            PatientID = {patient[0]}"
+            self.dbCursor.execute(queryPatients)
+            queryDeletePatient = f"DELETE FROM patients WHERE ID = {patient[0]}"
+            self.dbCursor.execute(queryDeletePatient)
         self.dbCon.commit()
         self.dbCon.close()
         return self.dbCursor.fetchone()

@@ -8,9 +8,11 @@ from flask import flash
 from flask_bootstrap import Bootstrap
 from addpatient import AddPatient as AddPatientForm
 from addtherapist import AddTherapist as AddTherapistForm
+from addencounter import AddEncounter as AddEncounterForm
 from sort import SortData as SortDataForm
 #from dynamodb import Artifacts
 import database
+import sys
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "my secret key"
@@ -23,42 +25,10 @@ def index():
     dbGetInfo = database.GetInformationFromDB(databaseName)
     allVisits = dbGetInfo.getAllVisits()
     if sortForm.validate_on_submit():
-        nameOfSouvenir = sortForm.souvenir.data
-        producer = sortForm.producer.data
-        country = sortForm.country.data
-        price = sortForm.price.data
-        year = sortForm.year.data
-        radioBtn = sortForm.sortBy.data
-        tmpRdsData = []
-        if radioBtn == "Producer" and len(producer) > 0:
-            for x in rdsData:
-                if x[3] == producer:
-                    tmpRdsData.append(x)
-            rdsData = tmpRdsData
-            flash(radioBtn)
-        if radioBtn == "Country" and len(country) > 0:
-            for x in rdsData:
-                if x[4] == country:
-                    tmpRdsData.append(x)
-            rdsData = tmpRdsData
-            flash(radioBtn)
-        if radioBtn == "Price less" and price is not None: 
-            for x in rdsData:
-                if x[1] < price:
-                    tmpRdsData.append(x)
-            rdsData = tmpRdsData
-            flash(radioBtn)
-        if radioBtn == "Year and Producer" and len(nameOfSouvenir) > 0 and year is not None:
-            for x in rdsData:
-                if x[0] == nameOfSouvenir and x[2] == year:
-                    tmpRdsData.append(x)
-            rdsData = tmpRdsData
-            flash(radioBtn)
-        if radioBtn == "Delete producer" and len(producer) > 0:
-            rdsRemove = database.DeleteInfo(databaseName)
-            rdsRemove.removeProducer(producer)
-            flash("Producer with souvenirs was deleted")
-            return redirect(url_for('index'))
+        dbRemovePatients = database.DeleteInfo(databaseName)
+        dbRemovePatients.removePatientsOlder20Years()
+        flash("Patients with visits older than 20 years were deleted")
+        return redirect(url_for('index'))
     return render_template('index.html', visits=allVisits, form=sortForm)
 
 @app.route('/add/patient', methods=['GET','POST'])
@@ -87,6 +57,57 @@ def therapist():
         return redirect(url_for('therapist'))
 
     return render_template('add_therapist.html', form=addTherapist)
+
+@app.route('/add/encounter', methods=['GET','POST'])
+def encounter():
+    dbConn = database.GetInformationFromDB(databaseName)
+    getAllPatients = dbConn.requestPatients()
+    getAllTherapists = dbConn.requestTherapists()
+    addEncounter = AddEncounterForm(getAllPatients,getAllTherapists)
+    if addEncounter.validate_on_submit():
+        date = addEncounter.date.data.strftime('%Y-%m-%d')
+        reason = addEncounter.reason.data
+        patient = addEncounter.patient.data.split(' ')
+        therapist = addEncounter.therapist.data.split(' ')
+        dbConn = database.AddNewInformationToDB(databaseName)
+        dbConn.addEncounter(date,reason,patient,therapist)
+        return redirect(url_for('encounter'))
+
+    return render_template('add_encounter.html', form=addEncounter)
+
+@app.route('/show/therapists', methods=['GET','POST'])
+def getTherapist():
+    dbConn = database.GetInformationFromDB(databaseName)
+    getAllPatients = dbConn.requestPatients()
+    getAllTherapists = dbConn.requestTherapists()
+    addEncounter = AddEncounterForm(getAllPatients,getAllTherapists)
+    if addEncounter.validate_on_submit():
+        date = addEncounter.date.data.strftime('%Y-%m-%d')
+        reason = addEncounter.reason.data
+        patient = addEncounter.patient.data.split(' ')
+        therapist = addEncounter.therapist.data.split(' ')
+        dbConn = database.AddNewInformationToDB(databaseName)
+        dbConn.addEncounter(date,reason,patient,therapist)
+        return redirect(url_for('getTherapist'))
+
+    return render_template('therapists.html', form=addEncounter)
+
+@app.route('/show/patients', methods=['GET','POST'])
+def getPatient():
+    dbConn = database.GetInformationFromDB(databaseName)
+    getAllPatients = dbConn.requestPatients()
+    getAllTherapists = dbConn.requestTherapists()
+    addEncounter = AddEncounterForm(getAllPatients,getAllTherapists)
+    if addEncounter.validate_on_submit():
+        date = addEncounter.date.data.strftime('%Y-%m-%d')
+        reason = addEncounter.reason.data
+        patient = addEncounter.patient.data.split(' ')
+        therapist = addEncounter.therapist.data.split(' ')
+        dbConn = database.AddNewInformationToDB(databaseName)
+        dbConn.addEncounter(date,reason,patient,therapist)
+        return redirect(url_for('getTherapist'))
+
+    return render_template('patients.html', form=addEncounter)
 
 @app.errorhandler(404)
 def page_not_found(e):

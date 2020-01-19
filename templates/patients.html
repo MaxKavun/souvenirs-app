@@ -1,12 +1,16 @@
 {% extends 'base.html' %}
-{% block title %}Hospital{% endblock %}
+{% block title %}Patients{% endblock %}
 
 {% block page_content %}
 <div class="page-header">
-    <h1>Welcome to Hospital</h1>
+    <h1>Welcome to patients page</h1>
 </div>
 {% import 'bootstrap/wtf.html' as wtf %}
-{{ wtf.quick_form(form) }}
+<button class="btn" data-toggle="collapse" data-target="#demo">Sort by</button>
+
+<div id="demo" class="collapse">
+    {{ wtf.quick_form(form) }}
+</div>
 <div class="table-responsive">
     <table class="table">
         <thead>
