@@ -10,17 +10,17 @@ from additem import AddItem as AddItemForm
 from addproducer import AddProducer as AddProducerForm
 from sort import SortData as SortDataForm
 #from dynamodb import Artifacts
-import rds
+import database
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "my secret key"
 databaseName = 'hospital'
-rdsEnvironment = rds.CreateEnvironment(databaseName)
+rdsEnvironment = database.CreateEnvironment(databaseName)
 bootstrapTemp = Bootstrap(app)
 @app.route('/', methods=['GET','POST'])
 def index():
     sortForm = SortDataForm()
-    rdsGetInfo = rds.GetInformationFromDB(databaseName)
+    rdsGetInfo = database.GetInformationFromDB(databaseName)
     rdsData = rdsGetInfo.requestInformation()
     if sortForm.validate_on_submit():
         nameOfSouvenir = sortForm.souvenir.data
@@ -55,7 +55,7 @@ def index():
             rdsData = tmpRdsData
             flash(radioBtn)
         if radioBtn == "Delete producer" and len(producer) > 0:
-            rdsRemove = rds.DeleteInfo(databaseName)
+            rdsRemove = database.DeleteInfo(databaseName)
             rdsRemove.removeProducer(producer)
             flash("Producer with souvenirs was deleted")
             return redirect(url_for('index'))
@@ -63,7 +63,7 @@ def index():
 
 @app.route('/add/souvenir', methods=['GET','POST'])
 def user():
-    rdsGetInfo = rds.GetInformationFromDB(databaseName)
+    rdsGetInfo = database.GetInformationFromDB(databaseName)
     rdsGetInfoProducers = rdsGetInfo.requestProducers()
     addItem = AddItemForm(rdsGetInfoProducers)
     if addItem.validate_on_submit():
@@ -71,7 +71,7 @@ def user():
         souvenirPrice = addItem.price.data
         souvenirYear = addItem.year.data
         souvenirProducer = addItem.madeIn.data
-        rdsAddSouvenir = rds.AddNewInformationToDB(databaseName)
+        rdsAddSouvenir = database.AddNewInformationToDB(databaseName)
         rdsAddSouvenir.addSouvenir(souvenirName,souvenirPrice,souvenirYear,souvenirProducer)
 
         return redirect(url_for('user'))
@@ -83,7 +83,7 @@ def producer():
     if addProducer.validate_on_submit():
         nameProducer = addProducer.name.data
         countryProducer = addProducer.country.data
-        rdsAddProducer = rds.AddNewInformationToDB(databaseName)
+        rdsAddProducer = database.AddNewInformationToDB(databaseName)
         rdsAddProducer.addPerson(nameProducer,countryProducer)
 
     return render_template('add_producer.html', form=addProducer)

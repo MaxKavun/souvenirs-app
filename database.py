@@ -31,23 +31,29 @@ class CreateEnvironment():
             self.dbCursor.execute(f"USE {self.databaseName}")
             queryTherapists = "CREATE TABLE therapists (\
                 ID int PRIMARY KEY AUTO_INCREMENT,\
-                Name varchar(255),\
-                Price int,\
-                YearOfMade int,\
-                OwnerID int,\
-                FOREIGN KEY (OwnerID) REFERENCES persons (ID)\
+                FirstName varchar(255),\
+                LastName varchar(255),\
+                Speciality varchar(255),\
+                Shift varchar(255)\
             )"
             self.dbCursor.execute(queryTherapists)
             queryPatients = "CREATE TABLE patients (\
                 ID int PRIMARY KEY AUTO_INCREMENT,\
-                Name varchar(255),\
-                Country varchar(255)\
+                FirstName varchar(255),\
+                LastName varchar(255),\
+                Street varchar(255),\
+                TherapistID int,\
+                FOREIGN KEY (TherapistID) REFERENCES therapists (ID)\
             )"
             self.dbCursor.execute(queryPatients)
             queryVisits = "CREATE TABLE visits (\
                 ID int PRIMARY KEY AUTO_INCREMENT,\
-                Name varchar(255),\
-                Country varchar(255)\
+                Date DATE,\
+                Reason varchar(255),\
+                PatientID int,\
+                TherapistID int,\
+                FOREIGN KEY (PatientID) REFERENCES patients (ID),\
+                FOREIGN KEY (TherapistID) REFERENCES therapists (ID)\
             )"
             self.dbCursor.execute(queryVisits)
         except:
@@ -68,9 +74,10 @@ class GetInformationFromDB():
                 FROM artifacts as art\
                 JOIN persons as ps ON ps.ID = art.OwnerID\
                 WHERE 1=1"
-        self.dbCursor.execute(query)
-        data = self.dbCursor.fetchall()
+        #self.dbCursor.execute(query)
+        #data = self.dbCursor.fetchall()
         self.dbCon.close()
+        data = []
         return data
 
     def requestProducers(self):
