@@ -69,15 +69,15 @@ class GetInformationFromDB():
         self.dbCursor = self.dbCon.cursor()
         self.dbCursor.execute(f"USE {self.databaseName}")
 
-    def requestInformation(self):
-        query = "SELECT art.Name,art.Price,art.YearOfMade,ps.Name,ps.Country \
-                FROM artifacts as art\
-                JOIN persons as ps ON ps.ID = art.OwnerID\
-                WHERE 1=1"
-        #self.dbCursor.execute(query)
-        #data = self.dbCursor.fetchall()
+    def getAllVisits(self):
+        query = "SELECT vst.Date, vst.Reason, CONCAT(pt.FirstName,' ',pt.LastName), \
+                CONCAT(tr.FirstName,' ',tr.LastName)\
+                FROM visits as vst\
+                JOIN patients as pt ON pt.ID = vst.PatientID\
+                JOIN therapists as tr ON tr.ID = vst.TherapistID"
+        self.dbCursor.execute(query)
+        data = self.dbCursor.fetchall()
         self.dbCon.close()
-        data = []
         return data
 
     def requestProducers(self):

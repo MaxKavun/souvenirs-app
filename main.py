@@ -6,8 +6,8 @@ from flask import session
 from flask import url_for
 from flask import flash
 from flask_bootstrap import Bootstrap
-from additem import AddItem as AddItemForm
-from addproducer import AddProducer as AddProducerForm
+from addpatient import AddItem as AddItemForm
+from addencounter import AddProducer as AddProducerForm
 from sort import SortData as SortDataForm
 #from dynamodb import Artifacts
 import database
@@ -20,8 +20,8 @@ bootstrapTemp = Bootstrap(app)
 @app.route('/', methods=['GET','POST'])
 def index():
     sortForm = SortDataForm()
-    rdsGetInfo = database.GetInformationFromDB(databaseName)
-    rdsData = rdsGetInfo.requestInformation()
+    dbGetInfo = database.GetInformationFromDB(databaseName)
+    allVisits = dbGetInfo.getAllVisits()
     if sortForm.validate_on_submit():
         nameOfSouvenir = sortForm.souvenir.data
         producer = sortForm.producer.data
@@ -59,9 +59,9 @@ def index():
             rdsRemove.removeProducer(producer)
             flash("Producer with souvenirs was deleted")
             return redirect(url_for('index'))
-    return render_template('index.html', souvenirs=rdsData, form=sortForm)
+    return render_template('index.html', visits=allVisits, form=sortForm)
 
-@app.route('/add/souvenir', methods=['GET','POST'])
+@app.route('/add/patient', methods=['GET','POST'])
 def user():
     rdsGetInfo = database.GetInformationFromDB(databaseName)
     rdsGetInfoProducers = rdsGetInfo.requestProducers()
@@ -77,7 +77,7 @@ def user():
         return redirect(url_for('user'))
     return render_template('add_item.html', form=addItem)
 
-@app.route('/add/producer', methods=['GET','POST'])
+@app.route('/add/therapist', methods=['GET','POST'])
 def producer():
     addProducer = AddProducerForm()
     if addProducer.validate_on_submit():
